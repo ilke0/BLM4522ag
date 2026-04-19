@@ -14,7 +14,7 @@ Bu projede, MSSQL Server kullanılarak `SirketDB` adında örnek bir veritabanı
 
 ## 2. Test Ortamının Hazırlanması
 Sistemde öncelikle `SirketDB` oluşturulmuş ve içerisine `Personel` tablosu eklenerek örnek veriler girilmiştir.
-*(![Test Ortamı](img1.png) )*
+![Test Ortamı](img1.png) 
 
 ## 3. Yedekleme Stratejilerinin Uygulanması
 Veri kaybını sıfıra indirmek için 3 aşamalı yedekleme yapılmıştır:
