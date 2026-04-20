@@ -1,0 +1,4 @@
+RESTORE LOG SirketDB
+FROM DISK = 'C:\Backup\SirketDB_log.trn'
+WITH STOPAT = '2026-04-19 18:20:00',
+RECOVERY;

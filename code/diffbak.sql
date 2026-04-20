@@ -1,0 +1,3 @@
+BACKUP DATABASE SirketDB
+TO DISK = 'C:\Backup\SirketDB_diff.bak'
+WITH DIFFERENTIAL;
