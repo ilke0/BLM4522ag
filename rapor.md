@@ -1,4 +1,25 @@
-# Proje 2: Veritabanı Yedekleme ve Felaketten Kurtarma Planı
+🗄️ MSSQL Server — Veritabanı Yedekleme ve Felaketten Kurtarma Planı
+
+---
+
+**Hazırlayan:** İLKE ZENGİN - 21290464  
+**Tarih:** Nisan 2026  
+**Konu:** Bir veritabanının yedekleme ve felaketten kurtarma planlarının tasarlanması
+
+---
+
+## 📋 İçindekiler
+
+1. [Giriş](#giriş)
+2. [Test Ortamının Hazırlanması](#test-ortamının-hazırlanması)
+3. [Yedekleme Stratejisi](#yedekleme-stratejisi)
+4. [Felaket Senaryosu (Veri Kaybı)](#felaket-senaryosu-veri-kaybı)
+5. [Point-in-Time Restore (Belirli Bir Ana Geri Dönüş)](#point-in-time-restore-belirli-bir-ana-geri-dönüş)
+6. [Database Mirroring (Veritabanı Aynalama)](#database-mirroring-veritabanı-aynalama)
+7. [Zamanlayıcı ile Otomatik Yedekleme (SQL Server Agent)](#zamanlayıcı-ile-otomatik-yedekleme-sql-server-agent)
+8. [Test ve Doğrulama (Yedeklerin Geçerliliği)](#test-ve-doğrulama-yedeklerin-geçerliliği)
+9. [Sonuç](#sonuç)
+
 
 ---
 
@@ -140,8 +161,7 @@ WITH NORECOVERY;
 ---
 ## 7. Zamanlayıcı ile Otomatik Yedekleme (SQL Server Agent)
 
-SQL Server Developer Edition kullanıldığı için SQL Server Agent servisi aktif olarak kullanılmış ve yedekleme işlemleri otomatik hale getirilmiştir.
-
+SQL Server Developer Edition kullanıldığı için SQL Server Agent servisi aktif hale getirilmiş ve yedekleme işlemleri otomatikleştirilmiştir.
 Bu sayede manuel müdahale olmadan belirli zaman aralıklarında veritabanı yedekleri alınabilmektedir.
 
 ---
