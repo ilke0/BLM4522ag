@@ -138,10 +138,51 @@ WITH NORECOVERY;
 ```
 
 ---
+## 7. Zamanlayıcı ile Otomatik Yedekleme (SQL Server Agent)
 
-## 7. Zamanlayıcı ile Otomatik Yedekleme
+SQL Server Developer Edition kullanıldığı için SQL Server Agent servisi aktif olarak kullanılmış ve yedekleme işlemleri otomatik hale getirilmiştir.
 
-SQL Server Express sürümlerinde SQL Server Agent bulunmadığı için, yedekleme işlemleri **Windows Task Scheduler** kullanılarak otomatik hale getirilmiştir.
+Bu sayede manuel müdahale olmadan belirli zaman aralıklarında veritabanı yedekleri alınabilmektedir.
+
+---
+
+### 7.1 SQL Server Agent Job Oluşturma
+
+SQL Server Agent üzerinden yeni bir Job oluşturulmuştur:
+
+- Job Name: `SirketDB_Auto_Backup`
+- Step: T-SQL Command
+- Schedule: Daily (Her gün 02:00)
+
+---
+
+### 7.2 Backup Job Scripti
+
+```sql
+BACKUP DATABASE SirketDB
+TO DISK = 'C:\Backup\auto_full.bak'
+WITH INIT, STATS = 10;
+```
+
+### 7.3 Zamanlama (Schedule)
+
+Job aşağıdaki şekilde zamanlanmıştır:
+
+Her gün
+Saat: 02:00
+Otomatik çalıştırma aktif
+### 7.4 Doğrulama (Job Çalıştı mı?)
+
+SQL Server Agent üzerinden job history kontrol edilerek yedekleme işleminin başarıyla çalıştığı doğrulanmıştır.
+
+Ayrıca oluşan backup dosyası fiziksel olarak kontrol edilmiştir:
+
+C:\Backup\auto_full.bak
+
+Sonuç olarak yedekleme işlemleri tamamen otomatik hale getirilmiş ve insan hatası riski ortadan kaldırılmıştır.
+
+
+SQL Server Express sürümlerinde ise SQL Server Agent bulunmadığı için, yedekleme işlemleri **Windows Task Scheduler** kullanılarak otomatik hale getirilmiştir.
 
 **Yedekleme Scripti (`backup.sql`):**
 
@@ -159,17 +200,62 @@ sqlcmd -S localhost -E -i backup.sql
 
 ---
 
-## 8. Test ve Doğrulama
+## 8. Test ve Doğrulama (Yedeklerin Geçerliliği)
 
-Yapılan kurtarma işlemlerinin başarısı aşağıdaki sorgu ile teyit edilmiştir:
+Yedekleme işlemlerinin doğru çalıştığını doğrulamak için farklı test senaryoları uygulanmıştır.
+
+Amaç; yedek dosyalarının bozuk olup olmadığını, geri yüklenebilirliğini ve içeriğinin doğruluğunu kontrol etmektir.
+
+---
+
+### 8.1 RESTORE VERIFYONLY (Yedek Bütünlüğü)
 
 ```sql
-USE SirketDB;
-SELECT * FROM Musteriler;
+RESTORE VERIFYONLY
+FROM DISK = 'C:\Backup\SirketDB_full.bak';
+```
+Bu komut ile yedek dosyasının bozuk olup olmadığı kontrol edilmiştir.
+
+Sonuç:
+
+The backup set on file 1 is valid.
+
+Bu çıktı, yedek dosyasının sağlıklı olduğunu göstermektedir.
+
+### 8.2 RESTORE HEADERONLY (Metadata Kontrolü)
+```sql
+RESTORE HEADERONLY
+FROM DISK = 'C:\Backup\SirketDB_full.bak';
+```
+Bu komut ile yedeğin:
+Ne zaman alındığı
+Hangi veritabanına ait olduğu
+LSN bilgileri
+gibi metadata bilgileri kontrol edilmiştir.
+
+### 8.3 RESTORE FILELISTONLY (Dosya Yapısı Kontrolü)
+```sql
+RESTORE FILELISTONLY
+FROM DISK = 'C:\Backup\SirketDB_full.bak';
 ```
 
-> ✅ Testler sonucunda, silinen verilerin eksiksiz şekilde geri geldiği görülmüştür.
+Bu komut ile yedek dosyasının içindeki fiziksel veri dosyaları (MDF, LDF) incelenmiştir.
 
+### 8.4 Test Restore Senaryosu
+
+Yedeklerin gerçekten çalıştığını doğrulamak için test veritabanına restore işlemi yapılmıştır:
+```sql
+USE master;
+
+RESTORE DATABASE SirketDB_Test
+FROM DISK = 'C:\Backup\SirketDB_full.bak'
+WITH REPLACE;
+```
+Ardından veri kontrolü yapılmıştır:
+```sql
+USE SirketDB_Test;
+SELECT * FROM Musteriler;
+```
 ---
 
 ## 9. Sonuç
@@ -181,6 +267,6 @@ Bu proje kapsamında aşağıdaki yetkinlikler başarıyla uygulanmıştır:
 | **Kademeli Yedekleme** | Full, Diff ve Log yedekleme stratejileri ile veri güvenliği optimize edildi. |
 | **Kritik Kurtarma** | Point-in-time restore ile saniyeler bazında veri kurtarma yapıldı. |
 | **Yüksek Erişilebilirlik** | Mirroring mantığı ile donanım hatalarına karşı önlem alındı. |
-| **Otomasyon** | Task Scheduler entegrasyonu ile manuel işlem yükü ortadan kaldırıldı. |
+| **Otomasyon** | Task Scheduler entegrasyonu ve SQL Server Agent ile manuel işlem yükü ortadan kaldırıldı. |
 
 Sonuç olarak, kurumsal düzeyde bir **Disaster Recovery (Felaket Kurtarma)** sistemi tasarlanmış, test edilmiş ve başarıyla doğrulanmıştır.
